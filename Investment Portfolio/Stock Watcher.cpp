@@ -671,13 +671,13 @@ int main()
 			else if (inString == "help")
 			{
 				cout << "The commands are as follows :" << endl <<
-					"help      -----  List all of the commands" << endl << endl <<
-					"buy       -----  Begin the process of buying additional shares of stocks you already own, or of a company you do not yet own" << endl << endl <<
-					"sell      -----  Sell shares of stocks you already own at their current market value. Any earned money goes towards paying off invested values, and once paid off, the rest of the proceedswill go towards your profile's capital gains." << endl << endl <<
-					"search    -----  Look for a specific company by name or by symbol, and see their current price  per share, how many shares you own, and their total value" << endl << endl <<
+					"help      -----  List all of the commands" << endl <<
+					"buy       -----  Begin the process of buying additional shares of stocks you already own, or of a company you do not yet own" << endl <<
+					"sell      -----  Sell shares of stocks you already own at their current market value. Any earned money goes towards paying off invested values, and once paid off, the rest of the proceedswill go towards your profile's capital gains." << endl <<
+					"search    -----  Look for a specific company by name or by symbol, and see their current price  per share, how many shares you own, and their total value" << endl <<
 					"portfolio -----  Display your current portfolio's data, including all stocks currently owned, current price of each stock, shares owned, total equity in each, "
-					"profits/losses of each stock and your whole portfolio, and the capital gains earned from selling stocks." << endl << endl <<
-					"log out   -----  Log out of the current profile, save all changes made, and go to the starting command screen." << endl << endl <<
+					"profits/losses of each stock and your whole portfolio, and the capital gains earned from selling stocks." << endl <<
+					"log out   -----  Log out of the current profile, save all changes made, and go to the starting command screen." << endl <<
 					"quit      -----  Exit the program, save any completed sales or purchases, but discard any changes in progress. Can enter at any time to quit." << endl << endl;
 			}
 
