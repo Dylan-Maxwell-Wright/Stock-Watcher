@@ -53,7 +53,7 @@ private: //Price will represent per share prices of specific stocks, value will 
 	float currentPrice, buyPrice;
 	double currentValue, buyValue;
 	double totalInvested, totalEquity, profit_loss, totalProfit_loss;
-	double capitalGains; //This should be the variable to track all money the profile has made by selling shares
+	double capitalGains; //This is the variable to track all money the profile has made by selling shares at higher prices
 
 	void backgroundLoopUpdater(string symbol) //when looping through symbols vector, this will update the portfolio in the background
 	{
@@ -75,7 +75,7 @@ public:
 	Portfolio(string);
 
 	bool stockOwned = false;
-	bool cashedOut = false; //Used by update to remoe line if all shares are sold
+	bool cashedOut = false; //Used by update to remove line if all shares are sold
 
 	string GetName() { return Name; };
 	void SetName(string newName) { Name = newName; fileName = Name + ".txt";};
@@ -84,7 +84,6 @@ public:
 	string GetFileName() { return fileName; }
 	string GetSymbol() { return stockSymbol; }
 	string GetStockName() { return stockName;  }
-	//float GetCurrentPrice() { return currentPrice; }
 
 	void stockLoader(string symbol) //load an owned stock into live portfolio variables. If unowned, set stockOwned to false. Call before updating price changes
 	{
@@ -96,7 +95,7 @@ public:
 		{
 			stockName = company; //This makes the stock name "error"
 			cout << "The Provided symbol does not match a company in our database." << endl;
-			cout << "Please try again. " << endl;
+			cout << "Please try again. " << endl << endl;
 		}
 
 		else
@@ -114,36 +113,13 @@ public:
 				std::getline(csv, csvReader, ','); //seperate first element (symbol)
 				if (csvReader == symbol) //if match, read data
 				{
-					/*std::getline(csv, csvReader, ',');
-					currentPrice = std::stof(csvReader);
-					std::getline(csv, csvReader, ',');
-					shares = std::stoi(csvReader);
-					std::getline(csv, csvReader, ',');
-					currentValue = std::stod(csvReader);
-					std::getline(csv, csvReader, ',');
-					buyValue = std::stod(csvReader);
-					std::getline(csv, csvReader, ',');
-					profit_loss = std::stod(csvReader);*/
+					
 					stockOwned = true;
-					//Same as:
 					transcribe(lineReader);
 					break;
-					cout << "Break didn't exit loop" << endl;
 				}
 			}
 
-			/*
-			if (stockOwned == false)  These lines should be part of a display function, only called when the user is viewing his stocks. Stockloader is called whenever the program mentions a stock, including when a user wants to view it
-			{
-				cout << "Stock not owned." << endl;
-			}
-			else
-			{
-				cout << company << ", current price per share: $" << currentPrice << ". Number of shares owned: " << shares << ". Current value of investment: $" << currentValue << ". Total purchase value: $" << buyValue << ". Overall profits/losses: $" << endl;
-				stockOwned = false; //reset tracker
-				//profits/losses track positive and negative, but currently this will be displayed as $-80 if there is an $80 loss. Need a function to parse the negative for this and for total profit/loss 
-			}
-			*/
 			if (stockOwned == false)
 			{
 				buyPrice = 0;
@@ -160,17 +136,6 @@ public:
 			
 			fReader.close();
 		}
-	}
-	//This function doesn't work. If there is a new stock, the whole portfolio needs to be updated because total invested, new total equity, and new companies owned need to be updated
-	void newStock(string symbol) //for previously unowned stocks, create a new line of data based on what is currently stored in Portfolio's variables
-	{
-		fstream fWriter;
-		string lineOutput;
-
-		fWriter.open(fileName, std::ios::app);
-		lineOutput = symbol + ',' + to_string(currentPrice) + ',' + to_string(shares) + ',' + to_string(currentValue) + ',' + to_string(buyValue) + ',' + to_string(profit_loss) + '\n';
-		fWriter.write(lineOutput.c_str(), sizeof(lineOutput.c_str()));
-		fWriter.close();
 	}
 	void transcribe(string stockLine) //Extracts a single stock's information from a string extracted from the file, and stores it into live variables
 	{
@@ -401,7 +366,7 @@ public:
 		shares += moreStocks;
 		updatePortfolio();
 
-		cout << moreStocks << " shares have been purchased for a total of $" << moneyIn << ". Your new portfolio for this company is as follows: " << endl;
+		cout << endl << moreStocks << " shares have been purchased for a total of $" << moneyIn << ". Your new portfolio for this company is as follows: " << endl << endl;
 
 		if (stockOwned == false)//only false if stock was previously unowned, and is new to the portfolio
 		{
@@ -448,7 +413,7 @@ public:
 		}
 		updatePortfolio();
 
-		cout << lessShares << " shares have been sold for a total of $" << moneyOut << ". Your new portfolio for this company is as follows: " << endl;
+		cout << endl << lessShares << " shares have been sold for a total of $" << moneyOut << ". Your new portfolio for this company is as follows: " << endl << endl;
 		printInfo();
 
 	}
@@ -472,7 +437,7 @@ public:
 		}
 		else
 		{
-			cout << moreShares << " shares have been purchased for a total of $" << moneyIn << ". Your new portfolio for this company is as follows: " << endl;
+			cout << endl << moreShares << " shares have been purchased for a total of $" << moneyIn << ". Your new portfolio for this company is as follows: " << endl << endl;
 		}
 
 		if (stockOwned == false) //only false if stock was previously unowned, and is new to the portfolio
@@ -528,11 +493,11 @@ public:
 		double difference = lessMoney - moneyOut;
 		if (difference != 0)
 		{
-			cout << lessShares << " shares have been sold for a total of $" << moneyOut << ". This is $" << difference << " less than was asked for, but only whole shares can be sold, and each share is currently worth $" << currentPrice << "." << endl;
+			cout << endl << lessShares << " shares have been sold for a total of $" << moneyOut << ". This is $" << difference << " less than was asked for, but only whole shares can be sold, and each share is currently worth $" << currentPrice << "." << endl << endl;
 		}
 		else
 		{
-			cout << lessShares << " shares have been sold for a total of $" << moneyOut << "." << endl;
+			cout << endl << lessShares << " shares have been sold for a total of $" << moneyOut << "." << endl << endl;
 		}
 
 		printInfo();
@@ -556,9 +521,11 @@ public:
 			//use vector, loop through, update price, update portfolio, and print all info to console
 			for (int i = 0; i < portfolioSymbols.size(); i++)
 			{
+				std::cout << endl;
 				displayLoopUpdater(portfolioSymbols[i]);
 			}
 		}
+		std::cout << endl;
 	}
 };
 
@@ -670,7 +637,7 @@ int main()
 
 			else if (inString == "help")
 			{
-				cout << "The commands are as follows :" << endl <<
+				cout << "The commands are as follows :" << endl << endl <<
 					"help      -----  List all of the commands" << endl <<
 					"buy       -----  Begin the process of buying additional shares of stocks you already own, or of a company you do not yet own" << endl <<
 					"sell      -----  Sell shares of stocks you already own at their current market value. Any earned money goes towards paying off invested values, and once paid off, the rest of the proceedswill go towards your profile's capital gains." << endl <<
