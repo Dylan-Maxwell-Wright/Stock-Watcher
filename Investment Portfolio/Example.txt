@@ -1,0 +1,3 @@
+Name,numberOfCompanies,totalEquity,totalInvested,totalProfit_loss
+NYSE_Symbol_1,currentPrice,shares,currentValue,buyValue,profit_loss
+NYSE_Symbol_2,currentPrice,shares,currentValue,buyValue,profit_loss
