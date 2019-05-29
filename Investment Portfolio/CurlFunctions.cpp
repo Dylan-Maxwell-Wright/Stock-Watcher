@@ -4,6 +4,7 @@
 #include <curl.h>
 #include <easy.h>
 #include <string>
+#include <iostream>
 
 using std::string;
 

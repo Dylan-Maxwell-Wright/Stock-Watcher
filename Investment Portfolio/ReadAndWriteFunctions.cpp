@@ -72,8 +72,18 @@ float priceReader()
 	std::getline(pricesFile, priceLine, '\n'); //throw away first line
 	std::getline(pricesFile, priceLine, ','); //throw away date
 	std::getline(pricesFile, priceLine, ','); //get price
-	price = std::stof(priceLine);
-	return price;
+	pricesFile.close();
+	try
+	{
+		price = std::stof(priceLine);
+		return price;
+	}
+	catch (std::invalid_argument)
+	{
+		return 0;
+	}
+	
+	
 }
 
 string companyName(string stockSymbol) //check database for company using symbol, and return company's name, or "error" if company is not in database

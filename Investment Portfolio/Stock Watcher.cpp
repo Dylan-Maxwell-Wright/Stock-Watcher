@@ -73,6 +73,7 @@ public:
 
 	Portfolio();
 	Portfolio(string);
+	~Portfolio();
 
 	bool stockOwned = false;
 	bool cashedOut = false; //Used by update to remove line if all shares are sold
@@ -258,12 +259,11 @@ public:
 			profit_loss = std::stod(valueReader);
 
 			totalEquity += currentValue;
-			totalProfit_loss += profit_loss;
-
+			totalProfit_loss += profit_loss;			
 		}
 
 		numberOfCompanies = portfolioSymbols.size();
-		if (numberOfCompanies != 0) //if no companies are owned, an exception is thrown here
+		if (numberOfCompanies != 0) //if no companies are owned, we cannot extract a capital gains ammount
 		{
 			capitalGains = std::stod(gainsReader);
 		}
@@ -334,28 +334,36 @@ public:
 		int rename1 = rename("temporary.txt", fileName.c_str());
 
 	}
-	void priceChangeUpdate() //Call after using singleUpdate(symbol) and stockLoader(symbol)
+	int priceChangeUpdate() //Call after using singleUpdate(symbol) and stockLoader(symbol)
 	{
 		float newPrice;
 		double tempValue, valueChange;
 		newPrice = priceReader(); //priceReader() takes the price from Market_Quote.txt and returns it
 
-		if (stockOwned)
+		if (newPrice == 0)
 		{
-			//Update Equity and value changes
-			totalEquity -= currentValue;
-			tempValue = shares * newPrice;
-			valueChange = tempValue - currentValue; //If new tempValue is greater, then value change is positive
-			currentValue = tempValue;
-			totalEquity += currentValue;
-
-			//Updtate profits and losses
-			totalProfit_loss -= profit_loss;
-			profit_loss += valueChange;
-			totalProfit_loss += profit_loss;
+			return 0;
 		}
+		else
+		{
+			if (stockOwned)
+			{
+				//Update Equity and value changes
+				totalEquity -= currentValue;
+				tempValue = shares * newPrice;
+				valueChange = tempValue - currentValue; //If new tempValue is greater, then value change is positive
+				currentValue = tempValue;
+				totalEquity += currentValue;
 
-		currentPrice = newPrice;
+				//Updtate profits and losses
+				totalProfit_loss -= profit_loss;
+				profit_loss += valueChange;
+				totalProfit_loss += profit_loss;
+			}
+
+			currentPrice = newPrice;
+			return 1;
+		}
 	}
 	void buyShares(unsigned int moreStocks) 
 	{
@@ -570,6 +578,10 @@ Portfolio::Portfolio(string ownerName)
 		
 	}
 }
+Portfolio::~Portfolio()
+{
+	
+}
 
 
 int main()
@@ -577,12 +589,14 @@ int main()
 	bool quitCommand = false;
 	bool logOut = false;
 	
-	Portfolio user;
+	
 
 	parseSymbols(); //use to generate stock symbol file, "NYSE_Symbols.txt" from NYSE coompany symbols and names file, "NYSE_CSV.txt", or "WIKI_CSV.txt" from "WIKI_Symbols.txt". 
 
 	do { //for loging out and switching profiles
 		logOut = false;
+
+		Portfolio user;
 
 		do {
 			readError = false;
@@ -687,80 +701,89 @@ int main()
 					}
 					else
 					{
+						int priceFetchTester;
 						user.stockLoader(companySymbol);
 						singleUpdate(companySymbol);
-						user.priceChangeUpdate(); //This function was moved to stock loader, so it needs to be manually called after singleUpdate
-						user.updatePortfolio();
-						user.printInfo();
-						bool exitCommand2 = false;
-						bool failedAttempt1 = false;
-
-						do {
-							if (failedAttempt1)
+						priceFetchTester = user.priceChangeUpdate();
+						if (priceFetchTester == 0)
+						{
+							cout << "There was an error fetching the price of that stock. Please try again with a different stock for now." << endl << endl;
+						}
+						else
+						{
+							if (user.stockOwned == true)
 							{
-								cout << "Please enter \"Shares\" to purchase a specific number of shares, or \"Value\" to specify the amount of money you wish to invest, or \"back\" if you would like to enter a different command: ";
-								failedAttempt1 = false;
+								user.updatePortfolio();
 							}
-							else
-							{
-								cout << "Please enter \"Shares\" to purchase a specific number of shares, or \"Value\" to specify the amount of money you wish to invest: ";
-							}
+							user.printInfo();
+							bool exitCommand2 = false;
+							bool failedAttempt1 = false;
 
-							cin.getline(lineReader, 32767, '\n');
-
-							command = inputToLower(lineReader);
-
-							if (command == "back")
-							{
-								exitCommand2 = true;
-							}
-							else if (command == "quit")
-							{
-								quitCommand = true;
-							}
-							else if (command == "shares")
-							{
-								try
+							do {
+								if (failedAttempt1)
 								{
-									unsigned int inputShares;								
-									cout << "Please enter the number of shares you would like to purchase: ";									
-									cin.getline(lineReader, 32767, '\n');
-									inputShares = std::stoi(lineReader);
-									//handle exception for bad input
-									user.buyShares(inputShares);
+									cout << "Please enter \"Shares\" to purchase a specific number of shares, or \"Value\" to specify the amount of money you wish to invest, or \"back\" if you would like to enter a different command: ";
+									failedAttempt1 = false;
+								}
+								else
+								{
+									cout << "Please enter \"Shares\" to purchase a specific number of shares, or \"Value\" to specify the amount of money you wish to invest: ";
+								}
+
+								cin.getline(lineReader, 32767, '\n');
+
+								command = inputToLower(lineReader);
+
+								if (command == "back")
+								{
 									exitCommand2 = true;
-									exitCommand1 = true;
 								}
-								catch (std::invalid_argument)
+								else if (command == "quit")
 								{
-									cout << "Invalid input. Once Shares or Value has been selected, only enter the amount you would like to purchase." << endl;
-									failedAttempt1 = true;									
+									quitCommand = true;
 								}
-							}
-							else if (command == "value")
-							{
-								try
+								else if (command == "shares")
 								{
-									double inputMoney;									
-									cout << "Please enter the amount of money you would like to invest: ";								
-									cin.getline(lineReader, 32767, '\n');
-									inputMoney = std::stod(lineReader);
-									//handle exception for bad input
-									user.investMoney(inputMoney);
-									exitCommand2 = true;
-									exitCommand1 = true;
+									try
+									{
+										unsigned int inputShares;
+										cout << "Please enter the number of shares you would like to purchase: ";
+										cin.getline(lineReader, 32767, '\n');
+										inputShares = std::stoi(lineReader);
+										user.buyShares(inputShares);
+										exitCommand2 = true;
+										exitCommand1 = true;
+									}
+									catch (std::invalid_argument)
+									{
+										cout << "Invalid input. Once Shares or Value has been selected, only enter the amount you would like to purchase." << endl;
+										failedAttempt1 = true;
+									}
 								}
-								catch (std::invalid_argument)
+								else if (command == "value")
 								{
-									cout << "Invalid input. Once Shares or Value has been selected, please only enter the amount you would like to purchase." << endl;
-									failedAttempt1 = true;
+									try
+									{
+										double inputMoney;
+										cout << "Please enter the amount of money you would like to invest: ";
+										cin.getline(lineReader, 32767, '\n');
+										inputMoney = std::stod(lineReader);
+										user.investMoney(inputMoney);
+										exitCommand2 = true;
+										exitCommand1 = true;
+									}
+									catch (std::invalid_argument)
+									{
+										cout << "Invalid input. Once Shares or Value has been selected, please only enter the amount you would like to purchase." << endl;
+										failedAttempt1 = true;
+									}
 								}
-							}
-							else
-							{
-								cout << "Invalid input, please try again. " << endl;
-							}
-						} while (!exitCommand2 && quitCommand == false);
+								else
+								{
+									cout << "Invalid input, please try again. " << endl;
+								}
+							} while (!exitCommand2 && quitCommand == false);
+						}
 					}
 
 
@@ -1015,8 +1038,7 @@ int main()
 			else if (inString == "log out" || inString == "logout")
 			{
 				user.backgroundPortfolioUpdate();
-				string signOff = user.GetName();
-				cout << "Profile saved, " << signOff << " logged out." << endl;
+				cout << "Profile saved. " << user.GetName() << " has been logged out." << endl << endl;
 				logOut = true;
 			} 
 
@@ -1035,6 +1057,10 @@ int main()
 
 		} while ((readError || !exitCommand) && (quitCommand == false && logOut == false));
 
+		user.~Portfolio();
+
 	} while (quitCommand == false || logOut == true);
+
+	return 0;
 }
 
